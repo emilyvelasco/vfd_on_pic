@@ -1,0 +1,284 @@
+EESchema Schematic File Version 4
+EELAYER 29 0
+EELAYER END
+$Descr USLetter 11000 8500
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Connector:Conn_01x11_Male J3
+U 1 1 5CA61E3C
+P 5700 3100
+F 0 "J3" H 5672 3124 50  0000 R CNN
+F 1 "Elements" H 5672 3033 50  0000 R CNN
+F 2 "" H 5700 3100 50  0001 C CNN
+F 3 "~" H 5700 3100 50  0001 C CNN
+	1    5700 3100
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x04_Male J4
+U 1 1 5CA63DA2
+P 5700 4050
+F 0 "J4" H 5672 4024 50  0000 R CNN
+F 1 "Grid Multiplexor" H 5672 3933 50  0000 R CNN
+F 2 "" H 5700 4050 50  0001 C CNN
+F 3 "~" H 5700 4050 50  0001 C CNN
+	1    5700 4050
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x05_Male J1
+U 1 1 5CA64756
+P 1400 1350
+F 0 "J1" H 1000 1450 50  0000 C CNN
+F 1 "ICSP Header" H 1000 1350 50  0000 C CNN
+F 2 "" H 1400 1350 50  0001 C CNN
+F 3 "~" H 1400 1350 50  0001 C CNN
+	1    1400 1350
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R1
+U 1 1 5CA65CD8
+P 3200 1150
+F 0 "R1" V 3000 1050 50  0000 L CNN
+F 1 "Pull-Up" V 3100 1050 50  0000 L CNN
+F 2 "" V 3130 1150 50  0001 C CNN
+F 3 "~" H 3200 1150 50  0001 C CNN
+	1    3200 1150
+	0    1    1    0   
+$EndComp
+$Comp
+L Connector:Conn_01x04_Male J2
+U 1 1 5CA6551C
+P 1400 1900
+F 0 "J2" H 1000 1900 50  0000 C CNN
+F 1 "I2C and Power" H 1000 1800 50  0000 C CNN
+F 2 "" H 1400 1900 50  0001 C CNN
+F 3 "~" H 1400 1900 50  0001 C CNN
+	1    1400 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3750 1800 3750 2400
+Wire Wire Line
+	1850 4500 3750 4500
+Wire Wire Line
+	2050 1900 2050 3000
+Wire Wire Line
+	2050 3000 2950 3000
+Wire Wire Line
+	1950 2000 1950 3100
+Wire Wire Line
+	1950 3100 2950 3100
+$Comp
+L MCU_Microchip_PIC16:PIC16F18344-P U1
+U 1 1 5CA60B3C
+P 3750 3100
+F 0 "U1" H 4200 3900 50  0000 C CNN
+F 1 "PIC16F18345" H 4200 3800 50  0000 C CNN
+F 2 "Package_DIP:DIP-20_W7.62mm" H 3750 2320 50  0001 C CNN
+F 3 "http://ww1.microchip.com/downloads/en/devicedoc/40001800a.pdf" H 3750 2400 50  0001 C CNN
+	1    3750 3100
+	1    0    0    -1  
+$EndComp
+Text Label 1600 1800 0    50   ~ 0
+VCC
+Wire Wire Line
+	1600 2100 1850 2100
+Wire Wire Line
+	1600 2000 1950 2000
+Wire Wire Line
+	1600 1900 2050 1900
+Text Label 1600 2100 0    50   ~ 0
+GND
+Text Label 1600 1900 0    50   ~ 0
+SDA
+Text Label 1600 2000 0    50   ~ 0
+SCL
+Wire Wire Line
+	1600 1250 3750 1250
+Wire Wire Line
+	3750 1250 3750 1800
+Connection ~ 3750 1800
+Wire Wire Line
+	1600 1350 1850 1350
+Wire Wire Line
+	1850 1350 1850 2100
+Wire Wire Line
+	1600 1450 2800 1450
+Wire Wire Line
+	2800 1450 2800 2600
+Wire Wire Line
+	2800 2600 2950 2600
+Wire Wire Line
+	2950 2700 2700 2700
+Wire Wire Line
+	2700 2700 2700 1550
+Wire Wire Line
+	2700 1550 1600 1550
+Wire Wire Line
+	3750 3800 3750 4500
+Wire Wire Line
+	1850 2100 1850 4500
+Connection ~ 1850 2100
+Wire Wire Line
+	2950 3600 2850 3600
+Wire Wire Line
+	2850 3600 2850 4250
+Wire Wire Line
+	2850 4250 5500 4250
+Wire Wire Line
+	5500 4150 2750 4150
+Wire Wire Line
+	2750 4150 2750 3500
+Wire Wire Line
+	2750 3500 2950 3500
+Wire Wire Line
+	2950 3400 2650 3400
+Wire Wire Line
+	2650 3400 2650 4050
+Wire Wire Line
+	2650 4050 5500 4050
+Wire Wire Line
+	5500 3950 2550 3950
+Wire Wire Line
+	2550 3950 2550 3300
+Wire Wire Line
+	2550 3300 2950 3300
+Wire Wire Line
+	5500 2600 4550 2600
+Wire Wire Line
+	4550 2700 5500 2700
+Wire Wire Line
+	5500 2800 4550 2800
+Wire Wire Line
+	4550 2900 5500 2900
+Wire Wire Line
+	5500 3000 4550 3000
+Wire Wire Line
+	4550 3100 5500 3100
+Wire Wire Line
+	5500 3200 4550 3200
+Wire Wire Line
+	4550 3300 5500 3300
+Wire Wire Line
+	1600 1800 3750 1800
+Wire Wire Line
+	1600 1150 2600 1150
+Wire Wire Line
+	2600 1150 2600 2900
+Wire Wire Line
+	2600 2900 2950 2900
+Wire Wire Line
+	3050 1150 2600 1150
+Connection ~ 2600 1150
+Wire Wire Line
+	3350 1150 3750 1150
+Wire Wire Line
+	3750 1150 3750 1250
+Connection ~ 3750 1250
+$Comp
+L Device:Jumper JP1
+U 1 1 5CA89EC7
+P 4200 1450
+F 0 "JP1" H 4200 1714 50  0000 C CNN
+F 1 "Jumper" H 4200 1623 50  0000 C CNN
+F 2 "" H 4200 1450 50  0001 C CNN
+F 3 "~" H 4200 1450 50  0001 C CNN
+	1    4200 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Jumper JP2
+U 1 1 5CA8C58A
+P 4200 1600
+F 0 "JP2" H 4200 1400 50  0000 C CNN
+F 1 "Jumper" H 4200 1500 50  0000 C CNN
+F 2 "" H 4200 1600 50  0001 C CNN
+F 3 "~" H 4200 1600 50  0001 C CNN
+	1    4200 1600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2950 2800 2900 2800
+Wire Wire Line
+	2900 2800 2900 2200
+Wire Wire Line
+	2900 2200 4650 2200
+Wire Wire Line
+	4650 2200 4650 3600
+Wire Wire Line
+	4650 3600 5500 3600
+Wire Wire Line
+	5500 3500 4750 3500
+Wire Wire Line
+	4750 1600 4500 1600
+Wire Wire Line
+	3900 1600 3000 1600
+Wire Wire Line
+	3000 1550 2700 1550
+Connection ~ 2700 1550
+Connection ~ 2800 1450
+Wire Wire Line
+	4500 1450 4850 1450
+Wire Wire Line
+	4850 3400 5500 3400
+Wire Wire Line
+	3000 1600 3000 1550
+Wire Wire Line
+	2800 1450 3900 1450
+Wire Wire Line
+	4850 1450 4850 3400
+Wire Wire Line
+	4750 1600 4750 3500
+Text Label 5150 3950 0    50   ~ 0
+GRID_0
+Text Label 5150 4050 0    50   ~ 0
+GRID_1
+Text Label 5150 4150 0    50   ~ 0
+GRID_2
+Text Label 5150 4250 0    50   ~ 0
+GRID_4
+Text Label 5150 2600 0    50   ~ 0
+ELEM_A
+Text Label 5150 2700 0    50   ~ 0
+ELEM_B
+Text Label 5150 2800 0    50   ~ 0
+ELEM_C
+Text Label 5150 2900 0    50   ~ 0
+ELEM_D
+Text Label 5150 3000 0    50   ~ 0
+ELEM_E
+Text Label 5150 3100 0    50   ~ 0
+ELEM_F
+Text Label 5150 3200 0    50   ~ 0
+ELEM_G
+Text Label 5150 3300 0    50   ~ 0
+ELEM_H
+Text Label 5150 3400 0    50   ~ 0
+ELEM_I
+Text Label 5150 3500 0    50   ~ 0
+ELEM_J
+Text Label 5150 3600 0    50   ~ 0
+ELEM_K
+Text Label 1600 1150 0    50   ~ 0
+VPP
+Text Label 1600 1250 0    50   ~ 0
+VCC
+Text Label 1600 1350 0    50   ~ 0
+GND
+Text Label 1600 1450 0    50   ~ 0
+ICSPDAT
+Text Label 1600 1550 0    50   ~ 0
+ICSPCLK
+$EndSCHEMATC
