@@ -65,6 +65,46 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set SCL1 aliases
+#define SCL1_TRIS                 TRISAbits.TRISA4
+#define SCL1_LAT                  LATAbits.LATA4
+#define SCL1_PORT                 PORTAbits.RA4
+#define SCL1_WPU                  WPUAbits.WPUA4
+#define SCL1_OD                   ODCONAbits.ODCA4
+#define SCL1_ANS                  ANSELAbits.ANSA4
+#define SCL1_SetHigh()            do { LATAbits.LATA4 = 1; } while(0)
+#define SCL1_SetLow()             do { LATAbits.LATA4 = 0; } while(0)
+#define SCL1_Toggle()             do { LATAbits.LATA4 = ~LATAbits.LATA4; } while(0)
+#define SCL1_GetValue()           PORTAbits.RA4
+#define SCL1_SetDigitalInput()    do { TRISAbits.TRISA4 = 1; } while(0)
+#define SCL1_SetDigitalOutput()   do { TRISAbits.TRISA4 = 0; } while(0)
+#define SCL1_SetPullup()          do { WPUAbits.WPUA4 = 1; } while(0)
+#define SCL1_ResetPullup()        do { WPUAbits.WPUA4 = 0; } while(0)
+#define SCL1_SetPushPull()        do { ODCONAbits.ODCA4 = 0; } while(0)
+#define SCL1_SetOpenDrain()       do { ODCONAbits.ODCA4 = 1; } while(0)
+#define SCL1_SetAnalogMode()      do { ANSELAbits.ANSA4 = 1; } while(0)
+#define SCL1_SetDigitalMode()     do { ANSELAbits.ANSA4 = 0; } while(0)
+
+// get/set SDA1 aliases
+#define SDA1_TRIS                 TRISAbits.TRISA5
+#define SDA1_LAT                  LATAbits.LATA5
+#define SDA1_PORT                 PORTAbits.RA5
+#define SDA1_WPU                  WPUAbits.WPUA5
+#define SDA1_OD                   ODCONAbits.ODCA5
+#define SDA1_ANS                  ANSELAbits.ANSA5
+#define SDA1_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
+#define SDA1_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
+#define SDA1_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
+#define SDA1_GetValue()           PORTAbits.RA5
+#define SDA1_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
+#define SDA1_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
+#define SDA1_SetPullup()          do { WPUAbits.WPUA5 = 1; } while(0)
+#define SDA1_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
+#define SDA1_SetPushPull()        do { ODCONAbits.ODCA5 = 0; } while(0)
+#define SDA1_SetOpenDrain()       do { ODCONAbits.ODCA5 = 1; } while(0)
+#define SDA1_SetAnalogMode()      do { ANSELAbits.ANSA5 = 1; } while(0)
+#define SDA1_SetDigitalMode()     do { ANSELAbits.ANSA5 = 0; } while(0)
+
 /**
    @Param
     none
