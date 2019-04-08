@@ -43,6 +43,22 @@
 
 #include "mcc_generated_files/mcc.h"
 
+void every100ms(void)
+{
+    ELEM_A_Toggle();
+}
+
+unsigned char count1ms;
+void every1ms(void)
+{
+    count1ms++;
+    if (count1ms > 100) 
+    {
+        count1ms = 0;
+        every100ms();
+    }
+}
+
 /*
                          Main application
  */
@@ -55,10 +71,10 @@ void main(void)
     // Use the following macros to:
 
     // Enable the Global Interrupts
-    //INTERRUPT_GlobalInterruptEnable();
+    INTERRUPT_GlobalInterruptEnable();
 
     // Enable the Peripheral Interrupts
-    //INTERRUPT_PeripheralInterruptEnable();
+    INTERRUPT_PeripheralInterruptEnable();
 
     // Disable the Global Interrupts
     //INTERRUPT_GlobalInterruptDisable();
@@ -66,6 +82,9 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
+    // Set up our 1ms timer interrupt handler
+    TMR0_SetInterruptHandler(every1ms);
+    
     while (1)
     {
         // Add your application code

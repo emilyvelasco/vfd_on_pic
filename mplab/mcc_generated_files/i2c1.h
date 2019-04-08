@@ -52,7 +52,7 @@
 #include <stddef.h>
 #include <xc.h>
 
-#warning "This version of the I2C driver will be removed soon and the correct driver to use is the Foundation Services driver"
+// Thank you, duly noted. #warning "This version of the I2C driver will be removed soon and the correct driver to use is the Foundation Services driver"
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -141,7 +141,6 @@ void I2C1_ISR ( void );
 */
 
 extern volatile uint8_t    I2C1_slaveWriteData;
-
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
