@@ -75,24 +75,7 @@
 // 0B    Grid 1 MSB
 // 0C    Grid 2 LSB
 // 0D    Grid 2 MSB
-// 0E    Grid 3 LSB
-// 0F    Grid 3 MSB
-// 10    Grid 4 LSB
-// 11    Grid 4 MSB
-// 12    Grid 5 LSB
-// 13    Grid 5 MSB
-// 14    Grid 6 LSB
-// 15    Grid 6 MSB
-// 16    Grid 7 LSB
-// 17    Grid 7 MSB
-// 18    Grid 8 LSB
-// 19    Grid 8 MSB
-// 1A    Grid 9 LSB
-// 1B    Grid 9 MSB
-// 1C    Grid 10 LSB
-// 1D    Grid 10 MSB
-// 1E    Grid 11 LSB
-// 1F    Grid 11 MSB
+// [... repeat for as many grids as necessary... ]
 
 static uint8_t controlData[CONTROL_MAX];
 
@@ -106,23 +89,27 @@ void every1ms(void)
 {
     I2C1_CopyBuffer(controlData);
     
-    // Copy LSB bit pattern to outputs
-    PORTC = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)];
+    // Output grid selection to demultiplexor
     PORTB = gridIndex << 4;
     
-    // TODO: Pull out MSB and send to RA0-RA2
+    // Copy LSB bit pattern to outputs
+    PORTC = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)];
     
-    // We've spent one more millisecond on this grid
+    // If this interferes with I2C on RA4/RA5 we have to do bit twiddling
+    PORTA = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)+1];
+    
+    // One more millisecond on this grid, update indices as needed
     gridDwell++;
 
     // Have we spent enough time on this grid? If so move to next.
-    if (gridDwell > controlData[controlBlockStart+CDB_DWELL])
+    if (gridDwell >= controlData[controlBlockStart+CDB_DWELL])
     {
         gridDwell = 0;
         gridIndex++;
     }
     
     // If this is all the grids we need to cover, go back to the start.
+    // Increment number of times we've covered all the grids (cycles))
     if (gridIndex >= controlData[controlBlockStart+CDB_GRIDS])
     {
         gridIndex = 0;
@@ -131,7 +118,7 @@ void every1ms(void)
     
     // If we've gone through the number of specified cycles, move on to the
     // next pattern.
-    if (cycleCount > controlData[controlBlockStart+CDB_CYCLES])
+    if (cycleCount >= controlData[controlBlockStart+CDB_CYCLES])
     {
         cycleCount = 0;
         controlBlockStart = controlData[controlBlockStart+CDB_NEXT];
