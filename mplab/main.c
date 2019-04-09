@@ -46,35 +46,25 @@
 #define CONTROL_MAX 0x7F
 
 // Control data block
-// Index Purpose
-// 00    Number of grids/digits/etc. to cycle through
+// Purpose
+// Number of grids/digits/etc. to cycle through
 #define CDB_GRIDS 0x00
 
-// 01    Number of milliseconds to dwell on each of index 00
-#define CDB_DWELL 0x01
+// How many cycles to stay within this data block
+#define CDB_CYCLES 0x01
 
-// 02    Power level (numerator) for full power, make equal to 03.
-#define CDB_PWR_NUM 0x02
+// Starting address of next control data block
+#define CDB_NEXT 0x02
 
-// 03    Power level (denominator) a multiple of 01 for best results
-#define CDB_PWR_DEN 0x03
+// 03    Reserved for future feature
 
-// 04    How many cycles to stay within this data block
-#define CDB_CYCLES 0x04
-
-// 05    Starting address of next control data block
-#define CDB_NEXT 0x05
-
-// 06    Reserved for future feature
-// 07    Reserved for future feature
-
-#define CDB_GRID_DATA 0x08
-// 08    Grid 0 LSB
-// 09    Grid 0 MSB
-// 0A    Grid 1 LSB
-// 0B    Grid 1 MSB
-// 0C    Grid 2 LSB
-// 0D    Grid 2 MSB
+#define CDB_GRID_DATA 0x04
+// 04    Grid 0 LSB
+// 05    Grid 0 MSB
+// 06    Grid 1 LSB
+// 07    Grid 1 MSB
+// 08    Grid 2 LSB
+// 09    Grid 2 MSB
 // [... repeat for as many grids as necessary... ]
 
 static uint8_t controlData[CONTROL_MAX];
@@ -82,10 +72,9 @@ static uint8_t controlData[CONTROL_MAX];
 // Variables for the current pattern
 unsigned char controlBlockStart;
 unsigned char gridIndex;
-unsigned char gridDwell;
 unsigned char cycleCount;
 
-void every1ms(void)
+void everyTimerTick(void)
 {
     I2C1_CopyBuffer(controlData);
     
@@ -97,16 +86,9 @@ void every1ms(void)
     
     // If this interferes with I2C on RA4/RA5 we have to do bit twiddling
     PORTA = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)+1];
-    
-    // One more millisecond on this grid, update indices as needed
-    gridDwell++;
 
-    // Have we spent enough time on this grid? If so move to next.
-    if (gridDwell >= controlData[controlBlockStart+CDB_DWELL])
-    {
-        gridDwell = 0;
-        gridIndex++;
-    }
+    // Next timer tick, next grid
+    gridIndex++;
     
     // If this is all the grids we need to cover, go back to the start.
     // Increment number of times we've covered all the grids (cycles))
@@ -149,12 +131,11 @@ void main(void)
     //INTERRUPT_PeripheralInterruptDisable();
 
     // Set up our 1ms timer interrupt handler
-    TMR0_SetInterruptHandler(every1ms);
+    TMR0_SetInterruptHandler(everyTimerTick);
     
     // Start with control block zero
     controlBlockStart = 0;
     gridIndex = 0;
-    gridDwell = 0;
     cycleCount = 0;
     
     while (1)

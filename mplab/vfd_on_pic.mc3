@@ -1,24 +1,24 @@
 <config configVersion="1.1" device="PIC16F18345" coreVersion="4.65">
    <usedClasses class="java.util.HashMap">
       <entry>
-         <string>System Module</string>
-         <string>class com.microchip.mcc.mcu8.systemManager.SystemManager</string>
-      </entry>
-      <entry>
          <string>TMR0</string>
          <string>class com.microchip.mcc.mcu8.modules.tmr0_mid0.TMR0</string>
+      </entry>
+      <entry>
+         <string>System Module</string>
+         <string>class com.microchip.mcc.mcu8.systemManager.SystemManager</string>
       </entry>
       <entry>
          <string>INTERNAL OSCILLATOR</string>
          <string>class com.microchip.mcc.mcu8.systemManager.osc.Osc</string>
       </entry>
       <entry>
-         <string>WDT</string>
-         <string>class com.microchip.mcc.mcu8.systemManager.wdt.WDT</string>
-      </entry>
-      <entry>
          <string>PMD</string>
          <string>class com.microchip.mcc.mcu8.systemManager.pmd.PMD</string>
+      </entry>
+      <entry>
+         <string>WDT</string>
+         <string>class com.microchip.mcc.mcu8.systemManager.wdt.WDT</string>
       </entry>
       <entry>
          <string>Pin Module</string>
@@ -5252,12 +5252,12 @@
          <hash>906d802ab3474050cb31b04bc6e61bc755e9c7d9ee45c5a3b7ba21051761e449</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/pin_manager.h</file>
-         <hash>8d110371932912a7a8fdac6a5f209fb8e4efff33f93e46f5943eee1714a46aa8</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/tmr0.c</file>
          <hash>a7756f69878ff6438a6dd262c16799c79457a0ad49ca976bd15bb4551a45bf0f</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/pin_manager.h</file>
+         <hash>8d110371932912a7a8fdac6a5f209fb8e4efff33f93e46f5943eee1714a46aa8</hash>
       </entry>
       <entry>
          <file>main.c</file>
@@ -5292,12 +5292,12 @@
          <hash>2e7d88c494c1c19f9a727936ee29361b8e2aa3f56aa2a107ec89eea551835440</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/pin_manager.c</file>
-         <hash>7a920dbefbf3c5da33c8dcc99421f3518e1dd4ef9efce43eb4833865bbf192cb</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/i2c1.c</file>
          <hash>3761cfa15547a1451a90783bdde0ef61d31d61abd708b076c3f206642a48977b</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/pin_manager.c</file>
+         <hash>7a920dbefbf3c5da33c8dcc99421f3518e1dd4ef9efce43eb4833865bbf192cb</hash>
       </entry>
    </generatedFileHashHistoryMap>
 </config>
