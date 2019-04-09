@@ -135,6 +135,9 @@ void I2C1_Initialize(void);
 
 void I2C1_ISR ( void );
 
+// Called by anyone who wants a copy of our emulated EEPROM buffer
+void I2C1_CopyBuffer(uint8_t *bufferArray);
+
 /**
    @Summary
         This varible contains the last data written to the I2C slave
