@@ -70,14 +70,12 @@
 static uint8_t controlData[CONTROL_MAX];
 
 // Variables for the current pattern
-unsigned char controlBlockStart;
-unsigned char gridIndex;
-unsigned char cycleCount;
+uint8_t controlBlockStart;
+uint8_t gridIndex;
+uint8_t cycleCount;
 
 void everyTimerTick(void)
 {
-    I2C1_CopyBuffer(controlData);
-    
     // Output grid selection to demultiplexor
     PORTB = gridIndex << 4;
     
@@ -94,17 +92,20 @@ void everyTimerTick(void)
     // Increment number of times we've covered all the grids (cycles))
     if (gridIndex >= controlData[controlBlockStart+CDB_GRIDS])
     {
+        // Check for updated data
+        I2C1_CopyBuffer(controlData);
+        
         gridIndex = 0;
         cycleCount++;
-    }
-    
-    // If we've gone through the number of specified cycles, move on to the
-    // next pattern.
-    if (cycleCount >= controlData[controlBlockStart+CDB_CYCLES])
-    {
-        cycleCount = 0;
-        controlBlockStart = controlData[controlBlockStart+CDB_NEXT];
-    }
+
+        // If we've gone through the number of specified cycles, move on to the
+        // next pattern.
+        if (cycleCount >= controlData[controlBlockStart+CDB_CYCLES])
+        {
+            cycleCount = 0;
+            controlBlockStart = controlData[controlBlockStart+CDB_NEXT];
+        }
+    }    
 }
 
 /*
