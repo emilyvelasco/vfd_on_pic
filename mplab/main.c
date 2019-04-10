@@ -43,21 +43,23 @@
 
 #include "mcc_generated_files/mcc.h"
 
-#define CONTROL_MAX 0x7F
+#define CONTROL_MAX 0xEF // Size to copy EEPROM_Buffer array from I2C1.c
 
 // Control data block
 // Purpose
 // Number of grids/digits/etc. to cycle through
 #define CDB_GRIDS 0x00
 
-// How many cycles to stay within this data block
-#define CDB_CYCLES 0x01
+// Number of timer ticks to dwell at each grid
+#define CDB_DWELL 0x01
+
+// How many full grid cycles to stay within this data block
+#define CDB_CYCLES 0x02
 
 // Starting address of next control data block
-#define CDB_NEXT 0x02
+#define CDB_NEXT 0x03
 
-// 03    Reserved for future feature
-
+// Data for each grid
 #define CDB_GRID_DATA 0x04
 // 04    Grid 0 LSB
 // 05    Grid 0 MSB
@@ -72,40 +74,46 @@ static uint8_t controlData[CONTROL_MAX];
 // Variables for the current pattern
 uint8_t controlBlockStart;
 uint8_t gridIndex;
-uint8_t cycleCount;
+uint8_t gridDwellCount;
+uint16_t cycleCount; // Incremented every timer tick.
 
 void everyTimerTick(void)
 {
-    // Output grid selection to demultiplexor
-    PORTB = gridIndex << 4;
-    
-    // Copy LSB bit pattern to outputs
-    PORTC = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)];
-    
-    // If this interferes with I2C on RA4/RA5 we have to do bit twiddling
-    PORTA = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)+1];
-
-    // Next timer tick, next grid
-    gridIndex++;
-    
-    // If this is all the grids we need to cover, go back to the start.
-    // Increment number of times we've covered all the grids (cycles))
-    if (gridIndex >= controlData[controlBlockStart+CDB_GRIDS])
+    gridDwellCount++;
+    if (gridDwellCount >= controlData[controlBlockStart+CDB_DWELL])
     {
-        // Check for updated data
-        I2C1_CopyBuffer(controlData);
-        
-        gridIndex = 0;
-        cycleCount++;
+        // Output next grid selection to decoder
+        PORTB = gridIndex << 4;
 
-        // If we've gone through the number of specified cycles, move on to the
-        // next pattern.
-        if (cycleCount >= controlData[controlBlockStart+CDB_CYCLES])
+        // Copy LSB bit pattern to outputs
+        PORTC = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)];
+
+        // If this interferes with I2C on RA4/RA5 we have to do bit twiddling
+        PORTA = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)+1];
+
+        // Next grid to follow
+        gridIndex++;
+        
+        // If this is all the grids we need to cover, go back to the start.
+        // Increment number of times we've covered all the grids (cycles))
+        if (gridIndex >= controlData[controlBlockStart+CDB_GRIDS])
         {
-            cycleCount = 0;
-            controlBlockStart = controlData[controlBlockStart+CDB_NEXT];
-        }
-    }    
+            gridIndex = 0;
+            cycleCount++;
+
+            // Move on to the next pattern if we've stayed at this one long enough.
+            if (cycleCount >= controlData[controlBlockStart+CDB_CYCLES])
+            {
+                // Check for updated data
+                I2C1_CopyBuffer(controlData);
+
+                cycleCount = 0;
+                controlBlockStart = controlData[controlBlockStart+CDB_NEXT];
+            }
+        }    
+        
+        gridDwellCount = 0;
+    }
 }
 
 /*
@@ -138,6 +146,7 @@ void main(void)
     controlBlockStart = 0;
     gridIndex = 0;
     cycleCount = 0;
+    gridDwellCount = 0;
     
     while (1)
     {
