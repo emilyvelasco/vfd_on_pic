@@ -76,41 +76,14 @@ uint8_t controlBlockStart;
 uint8_t gridIndex;
 uint8_t gridDwellCount;
 uint16_t cycleCount; // Incremented every timer tick.
+uint8_t moveToNextGrid;
 
 void everyTimerTick(void)
 {
     gridDwellCount++;
     if (gridDwellCount >= controlData[controlBlockStart+CDB_DWELL])
     {
-        // Output next grid selection to decoder
-        PORTB = gridIndex << 4;
-
-        // Copy LSB bit pattern to outputs
-        PORTC = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)];
-
-        // If this interferes with I2C on RA4/RA5 we have to do bit twiddling
-        PORTA = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)+1];
-
-        // Next grid to follow
-        gridIndex++;
-        
-        // If this is all the grids we need to cover, go back to the start.
-        // Increment number of times we've covered all the grids (cycles))
-        if (gridIndex >= controlData[controlBlockStart+CDB_GRIDS])
-        {
-            gridIndex = 0;
-            cycleCount++;
-
-            // Move on to the next pattern if we've stayed at this one long enough.
-            if (cycleCount >= controlData[controlBlockStart+CDB_CYCLES])
-            {
-                // Check for updated data
-                I2C1_CopyBuffer(controlData);
-
-                cycleCount = 0;
-                controlBlockStart = controlData[controlBlockStart+CDB_NEXT];
-            }
-        }    
+        moveToNextGrid = true;
         
         gridDwellCount = 0;
     }
@@ -147,10 +120,43 @@ void main(void)
     gridIndex = 0;
     cycleCount = 0;
     gridDwellCount = 0;
+    moveToNextGrid = false;
     
     while (1)
     {
-        // Add your application code
+        if(moveToNextGrid)
+        {
+            // Output next grid selection to decoder
+            PORTB = gridIndex << 4;
+
+            // Copy LSB bit pattern to outputs
+            PORTC = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)];
+
+            // If this interferes with I2C on RA4/RA5 we have to do bit twiddling
+            PORTA = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)+1];
+
+            // Next grid to follow
+            gridIndex++;
+
+            // If this is all the grids we need to cover, go back to the start.
+            // Increment number of times we've covered all the grids (cycles))
+            if (gridIndex >= controlData[controlBlockStart+CDB_GRIDS])
+            {
+                gridIndex = 0;
+                cycleCount++;
+
+                // Check for updated data
+                I2C1_CopyBuffer(controlData);
+
+                // Move on to the next pattern if we've stayed at this one long enough.
+                if (cycleCount >= controlData[controlBlockStart+CDB_CYCLES])
+                {
+                    cycleCount = 0;
+                    controlBlockStart = controlData[controlBlockStart+CDB_NEXT];
+                }
+            }
+            moveToNextGrid = false;
+        }
     }
 }
 /**
