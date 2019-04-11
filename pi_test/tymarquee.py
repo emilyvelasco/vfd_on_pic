@@ -15,3 +15,6 @@ scroll_range = range(0,len(thank_you_text)-16)
 for position in scroll_range:
     pi.i2c_write_i2c_block_data(p,0x04,thank_you_text[position:])
     time.sleep(0.5)
+    
+pi.i2c_close(p)
+pi.stop()
