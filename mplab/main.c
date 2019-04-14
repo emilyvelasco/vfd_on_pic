@@ -43,24 +43,24 @@
 
 #include "mcc_generated_files/mcc.h"
 
-#define CONTROL_MAX 0xEF // Size to copy EEPROM_Buffer array from I2C1.c
+#define CONTROL_MAX 0xFE // Size to copy EEPROM_Buffer array from I2C1.c
 
 // Control data block
 // Purpose
 // Number of grids/digits/etc. to cycle through
-#define CDB_GRIDS 0x00
+#define CDB_GRIDS 0x00U
 
 // Number of timer ticks to dwell at each grid
-#define CDB_DWELL 0x01
+#define CDB_DWELL 0x01U
 
 // How many full grid cycles to stay within this data block
-#define CDB_CYCLES 0x02
+#define CDB_CYCLES 0x02U
 
 // Starting address of next control data block
-#define CDB_NEXT 0x03
+#define CDB_NEXT 0x03U
 
 // Data for each grid
-#define CDB_GRID_DATA 0x04
+#define CDB_GRID_DATA 0x04U
 // 04    Grid 0 LSB
 // 05    Grid 0 MSB
 // 06    Grid 1 LSB
@@ -126,14 +126,18 @@ void main(void)
     {
         if(moveToNextGrid)
         {
+            // Turn off existing segments
+            PORTC = 0xFF;
+            PORTA = 0xFF;
+                    
             // Output next grid selection to decoder
-            PORTB = gridIndex << 4;
+            PORTB = (uint8_t)(gridIndex << 4);
 
             // Copy LSB bit pattern to outputs
-            PORTC = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)];
+            PORTC = controlData[controlBlockStart+CDB_GRID_DATA+(2U*gridIndex)];
 
             // If this interferes with I2C on RA4/RA5 we have to do bit twiddling
-            PORTA = controlData[controlBlockStart+CDB_GRID_DATA+(2*gridIndex)+1];
+            PORTA = controlData[controlBlockStart+CDB_GRID_DATA+(2U*gridIndex)+1U];
 
             // Next grid to follow
             gridIndex++;
