@@ -4,6 +4,8 @@
 
 import pigpio
 import time
+from datetime import datetime
+from datetime import timedelta
 
 all_black = b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'
 
@@ -50,6 +52,36 @@ numbers = (all_black, num1, num2, num3, num4, num5, num6, num7)
 rectr     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFE\x03'
 rectl     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFD\x03'
 
+class nyancat:
+  frames = (
+    b'\xFF\x02\xA3\x03\xB7\x03\x7F\x01\xBE\x03\xBE\x03\xFB\x03\xFB\x03',
+    b'\xFF\x03\xA3\x02\xB7\x03\xFF\x01\x3E\x03\xBE\x03\xFB\x03\xFB\x03',
+    b'\xFF\x03\xFF\x03\xA3\x02\xFF\x01\xB7\x03\x3E\x03\xFB\x03\xFB\x03',
+    b'\xFF\x03\xFF\x03\xA3\x03\xFF\x00\xB7\x03\xB7\x03\x7B\x03\xFB\x03',
+    b'\xFF\x03\xFF\x03\x9C\x03\xFF\x01\xB7\x02\xB7\x03\xF7\x03\x7B\x03',
+    b'\x7F\x03\xFF\x03\x9C\x03\xFF\x01\xBE\x03\xB7\x02\xF7\x03\xF7\x03',
+    b'\xFF\x03\x1C\x03\xBE\x03\xFF\x01\xBE\x03\xBE\x03\xF7\x02\xF7\x03',
+    b'\xFF\x03\x9C\x03\x3E\x03\xFF\x01\xBE\x03\xBE\x03\xFB\x03\xF4\x03'
+  ) 
+
+  def __init__(self):
+    self.reset()
+    
+  def reset(self):
+    self.frame_index = 0
+    self.next_frame_time = datetime.now()
+
+  def next_time(self):
+    return self.next_frame_time
+
+  def current_frame(self):
+    if datetime.now() > self.next_frame_time:
+      self.next_frame_time = datetime.now() + timedelta(milliseconds=100)
+      self.frame_index = self.frame_index + 1
+      if self.frame_index >= len(self.frames):
+        self.frame_index = 0
+    return self.frames[self.frame_index]
+
 class deathclock:
   def __init__(self):
     self.pi = pigpio.pi()
@@ -60,15 +92,37 @@ class deathclock:
       print("Pi GPIO not connected, will print byte patterns")
     # Initialize screen to all black
     self.send(0x00,b'\x08\x0A\x20\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF')
+    self.prev_frame = all_black
 
   def send(self, offset, pattern):
+    """
+    Send the given pattern at the given offset to I2C device.
+    If no device, print out to stdout.
+    """
     if self.pi.connected:
       self.pi.i2c_write_i2c_block_data(self.p,offset,pattern)
     else:
       print("Offset {} Data {}".format(offset, ''.join('{:02x}'.format(x) for x in pattern)))
 
+  def close(self):
+    """
+    If Pi GPIO objects are connected, disconnect and close.
+    """
+    if self.pi.connected:
+      self.pi.i2c_close(self.p)
+      self.pi.stop()
+
   def run(self):
-    print("Nothing yet...")
+    try:
+      nc = nyancat()
+      while True:
+        frame = nc.current_frame()
+        if frame != self.prev_frame:
+          self.send(0x04, frame)
+          self.prev_frame = frame
+        time.sleep(0.01)
+    except KeyboardInterrupt:
+      self.close()
 
 if __name__ == "__main__":
   dc = deathclock()
