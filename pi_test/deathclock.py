@@ -59,6 +59,12 @@ def millis():
   """
   return time.perf_counter_ns() // 1000000
 
+def bytes_and(bytes1, bytes2):
+  combined = bytearray()
+  for b1,b2 in zip(bytes1, bytes2):
+    combined.append(b1 & b2)
+  return bytes(combined)
+
 class touch:
   """
   Represents input from touch sensor. Substitute with key press when GPIO
@@ -160,11 +166,27 @@ class deathclock:
             # Touch detected, move on to next state.
             state = "thinking"
         elif state == "thinking":
-          self.send(0x04, eye_open)
-          time.sleep(1)
+          self.send(0x04, bytes_and(eye_open, smile_r))
+          time.sleep(0.75)
+          self.send(0x04, bytes_and(eye_close, smile_r))
+          time.sleep(0.15)
+          self.send(0x04, bytes_and(eye_open, smile_r))
+          time.sleep(0.75)
+          self.send(0x04, bytes_and(eye_close, smile_r))
+          time.sleep(0.15)
+          self.send(0x04, bytes_and(eye_smile, smile_r))
+          time.sleep(1.00)
+          while touch_sensor.detected():
+            # Don't move on until finger has released
+            state = "thinking"
+          state = "display"
+        elif state == "display":
+          self.send(0x04, all_black)
+          time.sleep(5)
           state = "attract"
         else:
           print("Error - state {} found no takers. Typo?".format(state))
+          state = "start"
     except KeyboardInterrupt:
       self.close()
 
