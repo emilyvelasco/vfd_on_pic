@@ -4,8 +4,8 @@
 
 import pigpio
 import time
+import keyboard
 from datetime import datetime
-from datetime import timedelta
 
 all_black = b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'
 
@@ -52,6 +52,34 @@ numbers = (all_black, num1, num2, num3, num4, num5, num6, num7)
 rectr     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFE\x03'
 rectl     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFD\x03'
 
+def millis():
+  """
+  Arbitrary time scale used for timing. Intended to roughly approximate
+  millis() in Arduino
+  """
+  return time.perf_counter_ns() // 1000000
+
+class touch:
+  """
+  Represents input from touch sensor. Substitute with key press when GPIO
+  is absent.
+  """
+  def __init__(self, pi):
+    self.pi = pi
+    if self.pi.connected:
+      print("Pi GPIO connected, will try to read GPIO21")
+      self.pi.set_mode(21, pigpio.INPUT)
+      self.pi.set_pull_up_down(21, pigpio.PUD_UP) # Internal pullup, look for ground
+    else:
+      print("Pi GPIO not connected, will read space bar")
+
+  def detected(self):
+    if self.pi.connected:
+      # Touch detected when pin 21, set to internal pull-up, is low.
+      return 0 == self.pi.read(21)
+    else:
+      return keyboard.is_pressed(' ')
+
 class nyancat:
   frames = (
     b'\xFF\x02\xA3\x03\xB7\x03\x7F\x01\xBE\x03\xBE\x03\xFB\x03\xFB\x03',
@@ -69,14 +97,11 @@ class nyancat:
     
   def reset(self):
     self.frame_index = 0
-    self.next_frame_time = datetime.now()
-
-  def next_time(self):
-    return self.next_frame_time
+    self.next_frame_time = millis()
 
   def current_frame(self):
-    if datetime.now() > self.next_frame_time:
-      self.next_frame_time = datetime.now() + timedelta(milliseconds=100)
+    if millis() > self.next_frame_time:
+      self.next_frame_time = millis() + 100
       self.frame_index = self.frame_index + 1
       if self.frame_index >= len(self.frames):
         self.frame_index = 0
@@ -102,7 +127,8 @@ class deathclock:
     if self.pi.connected:
       self.pi.i2c_write_i2c_block_data(self.p,offset,pattern)
     else:
-      print("Offset {} Data {}".format(offset, ''.join('{:02x}'.format(x) for x in pattern)))
+      #print("Offset {} Data {}".format(offset, ''.join('{:02x}'.format(x) for x in pattern)))
+      print(''.join('{:02x}'.format(x) for x in pattern))
 
   def close(self):
     """
@@ -113,14 +139,32 @@ class deathclock:
       self.pi.stop()
 
   def run(self):
+    state = "start"
+    touch_sensor = touch(self.pi)
     try:
-      nc = nyancat()
       while True:
-        frame = nc.current_frame()
-        if frame != self.prev_frame:
-          self.send(0x04, frame)
-          self.prev_frame = frame
-        time.sleep(0.01)
+        if state == "start":
+          nc = nyancat()
+          nc.reset()
+          prev_frame = all_black
+          state = "attract"
+        elif state == "attract":
+          # No touch detected, continue running attract animation
+          frame = nc.current_frame()
+          if frame != prev_frame:
+            self.send(0x04, frame)
+            prev_frame = frame
+          time.sleep(0.025)
+
+          if touch_sensor.detected():
+            # Touch detected, move on to next state.
+            state = "thinking"
+        elif state == "thinking":
+          self.send(0x04, eye_open)
+          time.sleep(1)
+          state = "attract"
+        else:
+          print("Error - state {} found no takers. Typo?".format(state))
     except KeyboardInterrupt:
       self.close()
 
