@@ -99,9 +99,6 @@ class nyancat:
   ) 
 
   def __init__(self):
-    self.reset()
-    
-  def reset(self):
     self.frame_index = 0
     self.next_frame_time = millis()
 
@@ -112,6 +109,41 @@ class nyancat:
       if self.frame_index >= len(self.frames):
         self.frame_index = 0
     return self.frames[self.frame_index]
+
+class thinkingface:
+  frames = (
+    (1000, eye_open, smile_r),
+    (150, eye_close, smile_r),
+    (500, eye_open, smile_r),
+    (100, eye_close, smile_r),
+    (1000, eye_smile, smile_r)
+  )
+
+  def __init__(self):
+    self.complete = False
+    self.frame_index = 0
+    self.next_frame_time = millis()
+
+  def completed(self):
+    return self.complete
+
+  def current_frame(self):
+    if not self.complete:
+      if millis() > self.next_frame_time:
+        new_frame_index = self.frame_index + 1
+        if new_frame_index >= len(self.frames):
+          # We are done - do not increment frame count
+          self.complete = True
+        else:
+          self.next_frame_time = millis() + self.frames[new_frame_index][0]
+          self.frame_index = new_frame_index
+    
+    frame = all_black
+
+    for element in self.frames[self.frame_index][1:]:
+      frame = bytes_and(frame, element)
+
+    return frame
 
 class deathclock:
   def __init__(self):
@@ -150,12 +182,14 @@ class deathclock:
     try:
       while True:
         if state == "start":
+          # Set things up for the attraction loop
           nc = nyancat()
-          nc.reset()
           prev_frame = all_black
           state = "attract"
         elif state == "attract":
-          # No touch detected, continue running attract animation
+          # Attraction state has to run in a non-blocking loop
+          # so we could check touch sensor in between animating
+          # frames.
           frame = nc.current_frame()
           if frame != prev_frame:
             self.send(0x04, frame)
@@ -164,22 +198,20 @@ class deathclock:
 
           if touch_sensor.detected():
             # Touch detected, move on to next state.
+            face = thinkingface()
             state = "thinking"
         elif state == "thinking":
-          self.send(0x04, bytes_and(eye_open, smile_r))
-          time.sleep(0.75)
-          self.send(0x04, bytes_and(eye_close, smile_r))
-          time.sleep(0.15)
-          self.send(0x04, bytes_and(eye_open, smile_r))
-          time.sleep(0.75)
-          self.send(0x04, bytes_and(eye_close, smile_r))
-          time.sleep(0.15)
-          self.send(0x04, bytes_and(eye_smile, smile_r))
-          time.sleep(1.00)
-          while touch_sensor.detected():
-            # Don't move on until finger has released
-            state = "thinking"
-          state = "display"
+          frame = face.current_frame()
+          if frame != prev_frame:
+            self.send(0x04, frame)
+            prev_frame = frame
+          time.sleep(0.025)
+
+          # Don't move on until we have both of the following:
+          # 1: Animation has completed
+          # 2: Touch has released
+          if face.completed() and not touch_sensor.detected():
+            state = "display"
         elif state == "display":
           self.send(0x04, all_black)
           time.sleep(5)
