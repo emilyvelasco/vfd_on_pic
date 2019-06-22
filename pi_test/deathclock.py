@@ -37,7 +37,7 @@ def millis():
   Arbitrary time scale used for timing. Intended to roughly approximate
   millis() in Arduino
   """
-  return time.perf_counter_ns() // 1000000
+  return int(time.perf_counter()*1000)
 
 def bytes_and(bytes1, bytes2):
   combined = bytearray()
