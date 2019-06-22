@@ -29,16 +29,6 @@ ch        = b'\xFB\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 dot       = b'\xF7\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 w         = b'\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 
-num1      = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\x7F\x03'
-num2      = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\x7F\x03\xFF\x03'
-num3      = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\x7F\x03\xFF\x03\xFF\x03'
-num4      = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\x7F\x03\xFF\x03\xFF\x03\xFF\x03'
-num5      = b'\xFF\x03\xFF\x03\xFF\x03\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-num6      = b'\xFF\x03\xFF\x03\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-num7      = b'\xFF\x03\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-
-numbers = (all_black, num1, num2, num3, num4, num5, num6, num7)
-
 rectr     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFE\x03'
 rectl     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFD\x03'
 
@@ -163,6 +153,16 @@ class deathtime:
 
   colon     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x01\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 
+  num1      = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\x7F\x03'
+  num2      = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\x7F\x03\xFF\x03'
+  num3      = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\x7F\x03\xFF\x03\xFF\x03'
+  num4      = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\x7F\x03\xFF\x03\xFF\x03\xFF\x03'
+  num5      = b'\xFF\x03\xFF\x03\xFF\x03\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+  num6      = b'\xFF\x03\xFF\x03\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+  num7      = b'\xFF\x03\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+
+  numbers = (all_black, num1, num2, num3, num4, num5, num6, num7)
+
   def __init__(self):
     # Start with a day of the week combined with AM or PM
     self.frame = bytes_and(self.weekday[random.randint(0,6)], self.ampm[random.randint(0,1)])
@@ -183,11 +183,27 @@ class deathtime:
 
     self.frame = bytes_and(self.frame, timedigits)
 
-  def current_frame(self):
-    return self.frame
+    self.countdown = len(self.numbers)
+    self.complete = False
+    self.next_frame_time = 0
 
   def completed(self):
-    return True
+    return self.complete
+
+  def current_frame(self):
+    if not self.complete:
+      if millis() > self.next_frame_time:
+        self.countdown = self.countdown - 1
+        self.next_frame_time = millis() + 1000
+        if self.countdown == 0:
+          self.complete = True
+
+    displayframe = bytes_and(self.frame, self.numbers[self.countdown])
+
+    if self.countdown % 2 == 1:
+      displayframe = bytes_and(displayframe, self.colon)
+
+    return displayframe
 
 class deathclock:
   def __init__(self):
@@ -258,10 +274,18 @@ class deathclock:
             dt = deathtime()
             state = "display"
         elif state == "display":
-          self.send(0x04, dt.current_frame())
-          time.sleep(5)
+          frame = dt.current_frame()
+          if frame != prev_frame:
+            self.send(0x04, frame)
+            prev_frame = frame
+          time.sleep(0.25)
           if dt.completed():
-            state = "attract"
+            state = "conclude"
+        elif state == "conclude":
+          self.send(0x04, all_black)
+          prev_frame = all_black
+          time.sleep(1)
+          state = "attract"
         else:
           print("Error - state {} found no takers. Typo?".format(state))
           state = "start"
