@@ -3,9 +3,12 @@
 # Run "sudo pigpiod" before launching
 
 import pigpio
-import time
 import keyboard
+
+import time
 from datetime import datetime
+
+import random
 
 all_black = b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'
 
@@ -16,19 +19,6 @@ eye_close = b'\xFF\x03\xBF\x03\xFF\x03\xFF\x03\xFF\x03\xBF\x03\xFF\x03\xFF\x03'
 
 smile_l   = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xF7\x03\xFF\x03\xFF\x03\xFF\x03'
 smile_r   = b'\xFF\x03\xFF\x03\xF7\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-
-sun       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03'
-mon       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03\xFF\x03'
-tue       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03\xFF\x03\xFF\x03'
-wed       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-thu       = b'\xFF\x03\xFF\x03\xFF\x02\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-fri       = b'\xFF\x03\xFF\x02\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-sat       = b'\xFF\x02\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-
-weekday = (sun, mon, tue, wed, thu, fri, sat)
-
-am        = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFB\x03\xFF\x03'
-pm        = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xF7\x03\xFF\x03'
 
 on        = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFB\x03'
 off       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xF7\x03'
@@ -145,6 +135,60 @@ class thinkingface:
 
     return frame
 
+class deathtime:
+  sun       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03'
+  mon       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03\xFF\x03'
+  tue       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03\xFF\x03\xFF\x03'
+  wed       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+  thu       = b'\xFF\x03\xFF\x03\xFF\x02\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+  fri       = b'\xFF\x03\xFF\x02\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+  sat       = b'\xFF\x02\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+  weekday = (sun, mon, tue, wed, thu, fri, sat)
+
+  am        = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFB\x03\xFF\x03'
+  pm        = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xF7\x03\xFF\x03'
+  ampm = (am, pm)
+
+  digit0    = 0xC0
+  digit1    = 0xF9
+  digit2    = 0xA4
+  digit3    = 0xB0
+  digit4    = 0x99
+  digit5    = 0x92
+  digit6    = 0x82
+  digit7    = 0xF8
+  digit8    = 0x80
+  digit9    = 0x90
+  digits = (digit0,digit1,digit2,digit3,digit4,digit5,digit6,digit7,digit8,digit9)
+
+  colon     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x01\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+
+  def __init__(self):
+    # Start with a day of the week combined with AM or PM
+    self.frame = bytes_and(self.weekday[random.randint(0,6)], self.ampm[random.randint(0,1)])
+
+    timedigits = bytearray(all_black)
+    # Fill in digits
+    deathhour = random.randint(1,12)
+    if deathhour >= 10:
+      timedigits[10] = self.digit1
+    timedigits[8] = self.digits[deathhour%10]
+
+    deathminute = random.randint(0,59)
+    if deathminute < 10:
+      timedigits[4] = self.digit0
+    else:
+      timedigits[4] = self.digits[deathminute // 10]
+    timedigits[2] = self.digits[deathminute % 10]
+
+    self.frame = bytes_and(self.frame, timedigits)
+
+  def current_frame(self):
+    return self.frame
+
+  def completed(self):
+    return True
+
 class deathclock:
   def __init__(self):
     self.pi = pigpio.pi()
@@ -211,11 +255,13 @@ class deathclock:
           # 1: Animation has completed
           # 2: Touch has released
           if face.completed() and not touch_sensor.detected():
+            dt = deathtime()
             state = "display"
         elif state == "display":
-          self.send(0x04, all_black)
+          self.send(0x04, dt.current_frame())
           time.sleep(5)
-          state = "attract"
+          if dt.completed():
+            state = "attract"
         else:
           print("Error - state {} found no takers. Typo?".format(state))
           state = "start"
