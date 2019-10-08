@@ -31,8 +31,8 @@ w         = b'\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 
 rectr     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFE\x03'
 rectl     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFD\x03'
-
-twelve    = b'\xFF\x03\xC0\x03\xC0\x03\xFF\x01\xA0\x03\xF9\x03\xFF\x03\xFF\x03'
+              
+twelve    = b'\xFF\x03\xC0\x03\xC0\x03\xFF\x01\xA4\x03\xF9\x03\xFF\x03\xFF\x03'
 YOU       = b'\xFF\x03\xC1\x03\xCF\x03\xFF\x03\x4C\x03\xFF\x03\xFF\x03\xFF\x03'
 dIE       = b'\xFF\x03\x86\x03\xCF\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'
 On        = b'\xFF\x03\xAB\x03\xC0\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
@@ -112,7 +112,7 @@ class TwelveFlash:
 
   def current_frame(self):
     if millis() > self.next_frame_time:
-      self.next_frame_time = millis() + 400
+      self.next_frame_time = millis() + 1000
       self.frame_index = self.frame_index + 1
       if self.frame_index >= len(self.frames):
         self.frame_index = 0
@@ -188,10 +188,10 @@ class YouDieOn:
 
 class NiceDay:
   frames = (
-    (1000, HAVE),
-    (1000, A),
-    (1000, nICE),
-    (1000, dAY),
+    (750, HAVE),
+    (750, A),
+    (750, nICE),
+    (750, dAY),
   )
 
   def __init__(self):
@@ -354,7 +354,7 @@ class deathclock:
             face = thinkingface()
             state = "thinking"
           elif millis() > idletime:
-            idletime = millis() + 5000
+            idletime = millis() + 20000
             blinkingtwelve = TwelveFlash()
             state = "flashing"
         elif state == "flashing":
