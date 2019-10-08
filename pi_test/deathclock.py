@@ -32,6 +32,15 @@ w         = b'\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 rectr     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFE\x03'
 rectl     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFD\x03'
 
+twelve    = b'\xFF\x03\xC0\x03\xC0\x03\xFF\x01\xA0\x03\xF9\x03\xFF\x03\xFF\x03'
+YOU       = b'\xFF\x03\xC1\x03\xCF\x03\xFF\x03\x4C\x03\xFF\x03\xFF\x03\xFF\x03'
+dIE       = b'\xFF\x03\x86\x03\xCF\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'
+On        = b'\xFF\x03\xAB\x03\xC0\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+HAVE      = b'\xFF\x03\x86\x03\xC1\x03\xFF\x03\x88\x03\x89\x03\xFF\x03\xFF\x03'
+A         = b'\xFF\x03\x88\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+nICE      = b'\xFF\x03\x86\x03\xC6\x03\xFF\x03\xF9\x03\xAF\x02\xFF\x03\xFF\x03'
+dAY       = b'\xFF\x03\x91\x03\x81\x03\xFF\x03\xC1\x03\xFF\x03\xFF\x03\xFF\x03'
+
 def millis():
   """
   Arbitrary time scale used for timing. Intended to roughly approximate
@@ -90,6 +99,26 @@ class nyancat:
         self.frame_index = 0
     return self.frames[self.frame_index]
 
+class TwelveFlash:
+  frames = (
+    b'\xFF\x03\xC0\x03\xC0\x03\xFF\x01\xA0\x03\xF9\x03\xFF\x03\xFF\x03',
+    b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'
+    
+  ) 
+
+  def __init__(self):
+    self.frame_index = 0
+    self.next_frame_time = millis()
+
+  def current_frame(self):
+    if millis() > self.next_frame_time:
+      self.next_frame_time = millis() + 400
+      self.frame_index = self.frame_index + 1
+      if self.frame_index >= len(self.frames):
+        self.frame_index = 0
+    return self.frames[self.frame_index]
+
+
 class thinkingface:
   frames = (
     (1000, eye_open, smile_r),
@@ -124,6 +153,70 @@ class thinkingface:
       frame = bytes_and(frame, element)
 
     return frame
+
+class YouDieOn:
+  frames = (
+    (1000, YOU),
+    (1000, dIE),
+    (1000, On),
+  )
+
+  def __init__(self):
+    self.complete = False
+    self.frame_index = 0
+    self.next_frame_time = millis()
+
+  def completed(self):
+    return self.complete
+
+  def current_frame(self):
+    if not self.complete:
+      if millis() > self.next_frame_time:
+        new_frame_index = self.frame_index + 1
+        if new_frame_index >= len(self.frames):
+          # We are done - do not increment frame count
+          self.complete = True
+        else:
+          self.next_frame_time = millis() + self.frames[new_frame_index][0]
+          self.frame_index = new_frame_index
+    
+    frame = self.frames[self.frame_index][1]
+
+    return frame
+
+
+
+class NiceDay:
+  frames = (
+    (1000, HAVE),
+    (1000, A),
+    (1000, nICE),
+    (1000, dAY),
+  )
+
+  def __init__(self):
+    self.complete = False
+    self.frame_index = 0
+    self.next_frame_time = millis()
+
+  def completed(self):
+    return self.complete
+
+  def current_frame(self):
+    if not self.complete:
+      if millis() > self.next_frame_time:
+        new_frame_index = self.frame_index + 1
+        if new_frame_index >= len(self.frames):
+          # We are done - do not increment frame count
+          self.complete = True
+        else:
+          self.next_frame_time = millis() + self.frames[new_frame_index][0]
+          self.frame_index = new_frame_index
+    
+    frame = self.frames[self.frame_index][1]
+
+    return frame
+
 
 class deathtime:
   sun       = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x02\xFF\x03'
@@ -242,12 +335,13 @@ class deathclock:
     try:
       while True:
         if state == "start":
-          # Set things up for the attraction loop
+          # Set things up for the nyancat loop
           nc = nyancat()
           prev_frame = all_black
-          state = "attract"
-        elif state == "attract":
-          # Attraction state has to run in a non-blocking loop
+          state = "nyancat"
+          idletime = millis() + 5000
+        elif state == "nyancat":
+          # nyancat state has to run in a non-blocking loop
           # so we could check touch sensor in between animating
           # frames.
           frame = nc.current_frame()
@@ -255,11 +349,30 @@ class deathclock:
             self.send(0x04, frame)
             prev_frame = frame
           time.sleep(0.025)
-
           if touch_sensor.detected():
             # Touch detected, move on to next state.
             face = thinkingface()
             state = "thinking"
+          elif millis() > idletime:
+            idletime = millis() + 5000
+            blinkingtwelve = TwelveFlash()
+            state = "flashing"
+        elif state == "flashing":
+          frame = blinkingtwelve.current_frame()
+          if frame != prev_frame:
+            self.send(0x04, frame)
+            prev_frame = frame
+          time.sleep(0.025) 
+          if touch_sensor.detected():
+            # Touch detected, move on to next state.
+            face = thinkingface()
+            state = "thinking"
+          elif millis() > idletime:
+            # Set things up for the nyancat loop
+            idletime = millis() + 5000
+            nc = nyancat()
+            prev_frame = all_black
+            state = "nyancat"
         elif state == "thinking":
           frame = face.current_frame()
           if frame != prev_frame:
@@ -282,10 +395,11 @@ class deathclock:
           if dt.completed():
             state = "conclude"
         elif state == "conclude":
+          idletime = millis() + 5000
           self.send(0x04, all_black)
           prev_frame = all_black
           time.sleep(1)
-          state = "attract"
+          state = "nyancat"
         else:
           print("Error - state {} found no takers. Typo?".format(state))
           state = "start"
