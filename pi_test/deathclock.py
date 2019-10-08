@@ -32,7 +32,6 @@ w         = b'\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 rectr     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFE\x03'
 rectl     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFD\x03'
               
-              
 twelve    = b'\xFF\x03\xC0\x03\xC0\x03\xFF\x01\xA4\x03\xF9\x03\xF3\x03\xFF\x03'
 YOU       = b'\xFF\x03\xC1\x03\xCF\x03\xFF\x03\x4C\x03\xFF\x03\xFF\x03\xFF\x03'
 dIE       = b'\xFF\x03\x86\x03\xCF\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'
@@ -352,8 +351,8 @@ class deathclock:
           time.sleep(0.025)
           if touch_sensor.detected():
             # Touch detected, move on to next state.
-            Die = YouDieOn()
-            state = "DieMessage"
+            face = thinkingface()
+            state = "thinking"
           elif millis() > idletime:
             idletime = millis() + 20000
             blinkingtwelve = TwelveFlash()
@@ -366,16 +365,16 @@ class deathclock:
           time.sleep(0.025) 
           if touch_sensor.detected():
             # Touch detected, move on to next state.
-            Die = YouDieOn()
-            state = "DieMessage"
+            face = thinkingface()
+            state = "thinking"
           elif millis() > idletime:
             # Set things up for the nyancat loop
             idletime = millis() + 5000
             nc = nyancat()
             prev_frame = all_black
             state = "nyancat"
-        elif state == "DieMessage":
-          frame = die.current_frame()
+        elif state == "thinking":
+          frame = face.current_frame()
           if frame != prev_frame:
             self.send(0x04, frame)
             prev_frame = frame
