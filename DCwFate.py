@@ -384,7 +384,7 @@ class deathclock:
           # nyancat state has to run in a non-blocking loop
           # so we could check touch sensor in between animating
           # frames.
-          frame = nc.current_frame()
+          frame = YF.current_frame()
           if frame != prev_frame:
             self.send(0x04, frame)
             prev_frame = frame
