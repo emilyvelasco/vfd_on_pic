@@ -31,20 +31,30 @@ w         = b'\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 
 rectr     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFE\x03'
 rectl     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFD\x03'
-             
-              \xFF\x03\xC0\x03\xC0\x03\xFF\x03\xA4\x03\xF9\x03\xF3\x03\xFF\x03   
 twelve    = b'\xFF\x03\xC0\x03\xC0\x03\xFF\x03\xA4\x03\xF9\x03\xF3\x03\xFF\x03'
+
 YOU       = b'\xFF\x03\xC1\x03\xCF\x03\xFF\x03\x4C\x03\xFF\x03\xFF\x03\xFF\x03'
 dIE       = b'\xFF\x03\x86\x03\xCF\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'
 On        = b'\xFF\x03\xAB\x03\xC0\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
+
 HAVE      = b'\xFF\x03\x86\x03\xC1\x03\xFF\x03\x88\x03\x89\x03\xFF\x03\xFF\x03'
 A         = b'\xFF\x03\x88\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 nICE      = b'\xFF\x03\x86\x03\xC6\x03\xFF\x03\xF9\x03\xAF\x02\xFF\x03\xFF\x03'
 dAY       = b'\xFF\x03\x91\x03\x81\x03\xFF\x03\xC1\x03\xFF\x03\xFF\x03\xFF\x03'
 
+FInd      = b'\xFF\x03\xA1\x03\xAB\x03\xFF\x03\xF9\x03\x8E\x03\xFF\x03\xFF\x03'
+dISC      = b'\xFF\x03\xC6\x03\x92\x03\xFF\x03\xF9\x03\xA1\x03\xFF\x03\xFF\x03'
+OVEr      = b'\xFF\x03\xAF\x03\x86\x03\xFF\x03\xC1\x03\xC0\x03\xFF\x03\xFF\x03'
+YOUr      = b'\xFF\x03\xAF\x03\xC1\x03\xFF\x03\xC0\x03\x91\x03\xFF\x03\xFF\x03'
+FAtE      = b'\xFF\x03\x86\x03\x87\x03\xFF\x03\x88\x03\x8E\x03\xFF\x03\xFF\x03'
+
+tAP       = b'\xFF\x03\xFF\x03\x8C\x03\xFF\x03\x88\x03\x87\x03\xFF\x03\xFF\x03'
+tHE       = b'\xFF\x03\xFF\x03\x86\x03\xFF\x03\x89\x03\x87\x03\xFF\x03\xFF\x03'
+bALL      = b'\xFF\x03\xC7\x03\xC7\x03\xFF\x03\x88\x03\x83\x03\xFF\x03\xFF\x03'
+
+
 def millis():
-  """
-  Arbitrary time scale used for timing. Intended to roughly approximate
+  """  Arbitrary time scale used for timing. Intended to roughly approximate
   millis() in Arduino
   """
   return int(time.perf_counter()*1000)
@@ -81,10 +91,10 @@ class nyancat:
     b'\xFF\x02\xA3\x03\xB7\x03\x7F\x01\xBE\x03\xBE\x03\xFB\x03\xFB\x03',
     b'\xFF\x03\xA3\x02\xB7\x03\xFF\x01\x3E\x03\xBE\x03\xFB\x03\xFB\x03',
     b'\xFF\x03\xFF\x03\xA3\x02\xFF\x01\xB7\x03\x3E\x03\xFB\x03\xFB\x03',
-    b'\xFF\x03\xFF\x03\xA3\x03\xFF\x00\xB7\x03\xB7\x03\x7B\x03\xFB\x03',
+    b'\xFF\x03\x86\x03\x87\x03\xFF\x03\x88\x03\x8E\x03\xFF\x03\xFF\x03',
     b'\xFF\x03\xFF\x03\x9C\x03\xFF\x01\xB7\x02\xB7\x03\xF7\x03\x7B\x03',
     b'\x7F\x03\xFF\x03\x9C\x03\xFF\x01\xBE\x03\xB7\x02\xF7\x03\xF7\x03',
-    b'\xFF\x03\x1C\x03\xBE\x03\xFF\x01\xBE\x03\xBE\x03\xF7\x02\xF7\x03',
+    b'\xFF\x03\xFF\x03\x86\x03\xFF\x03\x89\x03\x87\x03\xFF\x03\xFF\x03',
     b'\xFF\x03\x9C\x03\x3E\x03\xFF\x01\xBE\x03\xBE\x03\xFB\x03\xF4\x03'
   ) 
 
@@ -110,7 +120,32 @@ class TwelveFlash:
 
   def __init__(self):
     self.frame_index = 0
-    self.next_frame_time = millis()
+    self.next_frame_time = millis() + 1000
+
+  def current_frame(self):
+    if millis() > self.next_frame_time:
+      self.next_frame_time = millis() + 1000
+      self.frame_index = self.frame_index + 1
+      if self.frame_index >= len(self.frames):
+        self.frame_index = 0
+    return self.frames[self.frame_index]
+
+class YourFate:
+  frames = (
+         
+    b'\xFF\x03\xA1\x03\xAB\x03\xFF\x03\xF9\x03\x8E\x03\xFF\x03\xFF\x03',
+    b'\xFF\x03\xAF\x03\xC1\x03\xFF\x03\xC0\x03\x91\x03\xFF\x03\xFF\x03',
+    b'\xFF\x03\x86\x03\x87\x03\xFF\x03\x88\x03\x8E\x03\xFF\x03\xFF\x03',
+    b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF',
+    b'\xFF\x03\xFF\x03\x8C\x03\xFF\x03\x88\x03\x87\x03\xFF\x03\xFF\x03',
+    b'\xFF\x03\xFF\x03\x86\x03\xFF\x03\x89\x03\x87\x03\xFF\x03\xFF\x03',
+    b'\xFF\x03\xC7\x03\xC7\x03\xFF\x03\x88\x03\x83\x03\xFF\x03\xFF\x03'
+    
+  ) 
+
+  def __init__(self):
+    self.frame_index = 0
+    self.next_frame_time = millis() + 1000
 
   def current_frame(self):
     if millis() > self.next_frame_time:
@@ -338,15 +373,15 @@ class deathclock:
       while True:
         if state == "start":
           # Set things up for the nyancat loop
-          nc = nyancat()
+          YF = YourFate()
           prev_frame = all_black
-          state = "nyancat"
-          idletime = millis() + 5000
-        elif state == "nyancat":
+          state = "YourFate"
+          idletime = millis() + 14000
+        elif state == "YourFate":
           # nyancat state has to run in a non-blocking loop
           # so we could check touch sensor in between animating
           # frames.
-          frame = nc.current_frame()
+          frame = YF.current_frame()
           if frame != prev_frame:
             self.send(0x04, frame)
             prev_frame = frame
@@ -356,7 +391,7 @@ class deathclock:
             face = thinkingface()
             state = "thinking"
           elif millis() > idletime:
-            idletime = millis() + 20000
+            idletime = millis() + 14000
             blinkingtwelve = TwelveFlash()
             state = "flashing"
         elif state == "flashing":
@@ -371,10 +406,10 @@ class deathclock:
             state = "thinking"
           elif millis() > idletime:
             # Set things up for the nyancat loop
-            idletime = millis() + 5000
-            nc = nyancat()
+            idletime = millis() + 14000
+            YF = YourFate()
             prev_frame = all_black
-            state = "nyancat"
+            state = "YourFate"
         elif state == "thinking":
           frame = face.current_frame()
           if frame != prev_frame:
@@ -397,11 +432,11 @@ class deathclock:
           if dt.completed():
             state = "conclude"
         elif state == "conclude":
-          idletime = millis() + 5000
+          idletime = millis() + 14000
           self.send(0x04, all_black)
           prev_frame = all_black
           time.sleep(1)
-          state = "nyancat"
+          state = "YourFate"
         else:
           print("Error - state {} found no takers. Typo?".format(state))
           state = "start"
@@ -411,3 +446,4 @@ class deathclock:
 if __name__ == "__main__":
   dc = deathclock()
   dc.run()
+
