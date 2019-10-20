@@ -32,8 +32,8 @@ w         = b'\x7F\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 rectr     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFE\x03'
 rectl     = b'\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFD\x03'
 twelve    = b'\xFF\x03\xC0\x03\xC0\x03\xFF\x03\xA4\x03\xF9\x03\xF3\x03\xFF\x03'
-
-YOU       = b'\xFF\x03\xC1\x03\xCF\x03\xFF\x03\x4C\x03\xFF\x03\xFF\x03\xFF\x03'
+             
+YOU       = b'\xFF\x03\xC1\x03\xC0\x03\xFF\x03\x91\x03\xFF\x03\xFF\x03\xFF\x03'
 dIE       = b'\xFF\x03\x86\x03\xCF\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'
 On        = b'\xFF\x03\xAB\x03\xC0\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 
@@ -139,7 +139,8 @@ class YourFate:
     b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF',
     b'\xFF\x03\xFF\x03\x8C\x03\xFF\x03\x88\x03\x87\x03\xFF\x03\xFF\x03',
     b'\xFF\x03\xFF\x03\x86\x03\xFF\x03\x89\x03\x87\x03\xFF\x03\xFF\x03',
-    b'\xFF\x03\xC7\x03\xC7\x03\xFF\x03\x88\x03\x83\x03\xFF\x03\xFF\x03'
+    b'\xFF\x03\xC7\x03\xC7\x03\xFF\x03\x88\x03\x83\x03\xFF\x03\xFF\x03',
+    b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'
     
   ) 
 
@@ -193,9 +194,10 @@ class thinkingface:
 
 class YouDieOn:
   frames = (
-    (2000, YOU),
-    (2000, dIE),
-    (2000, On),
+    (1500, YOU),
+    (1500, dIE),
+    (1500, On),
+    (1500, all_black),
   )
 
   def __init__(self):
@@ -225,16 +227,16 @@ class YouDieOn:
 
 class NiceDay:
   frames = (
-    (2000, HAVE),
-    (2000, A),
-    (2000, nICE),
-    (2000, dAY),
+    (1500, HAVE),
+    (1500, A),
+    (1500, nICE),
+    (1500, dAY),
   )
 
   def __init__(self):
     self.complete = False
     self.frame_index = 0
-    self.next_frame_time = millis() + 1000
+    self.next_frame_time = millis() + 1500
 
   def completed(self):
     return self.complete
@@ -427,7 +429,7 @@ class deathclock:
         elif state == "pretext_display":
             frame = pdt.current_frame()
             if frame != prev_frame:
-              self.send(0.x04, frame)
+              self.send(0x04, frame)
               prev_frame = frame
             time.sleep(0.025)
             if pdt.completed():
@@ -443,9 +445,10 @@ class deathclock:
             nd = NiceDay()
             state = "niceday"
         elif state == "niceday":
+          idletime = millis() + 6000
           frame = nd.current_frame()
           if frame != prev_frame:
-            self.send(0.x04, frame)
+            self.send(0x04, frame)
             prev_frame = frame
           time.sleep(0.025)
           if nd.completed():
@@ -457,7 +460,7 @@ class deathclock:
           time.sleep(0.25)
           if dt.completed():
             state = "conclude"
-        elif state == "conclude":
+        elif state == "conclude" and millis() > idletime:
           idletime = millis() + 14000
           self.send(0x04, all_black)
           prev_frame = all_black
