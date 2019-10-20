@@ -193,15 +193,15 @@ class thinkingface:
 
 class YouDieOn:
   frames = (
-    (1000, YOU),
-    (1000, dIE),
-    (1000, On),
+    (2000, YOU),
+    (2000, dIE),
+    (2000, On),
   )
 
   def __init__(self):
     self.complete = False
     self.frame_index = 0
-    self.next_frame_time = millis()
+    self.next_frame_time = millis() + 1000
 
   def completed(self):
     return self.complete
@@ -225,16 +225,16 @@ class YouDieOn:
 
 class NiceDay:
   frames = (
-    (750, HAVE),
-    (750, A),
-    (750, nICE),
-    (750, dAY),
+    (2000, HAVE),
+    (2000, A),
+    (2000, nICE),
+    (2000, dAY),
   )
 
   def __init__(self):
     self.complete = False
     self.frame_index = 0
-    self.next_frame_time = millis()
+    self.next_frame_time = millis() + 1000
 
   def completed(self):
     return self.complete
