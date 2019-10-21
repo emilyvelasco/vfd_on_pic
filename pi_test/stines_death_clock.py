@@ -231,6 +231,7 @@ class NiceDay:
     (1500, A),
     (1500, nICE),
     (1500, dAY),
+    (1500, all_black),
   )
 
   def __init__(self):
@@ -452,13 +453,6 @@ class deathclock:
             prev_frame = frame
           time.sleep(0.025)
           if nd.completed():
-            state = "conclude"
-          frame = dt.current_frame()
-          if frame != prev_frame:
-            self.send(0x04, frame)
-            prev_frame = frame
-          time.sleep(0.25)
-          if dt.completed():
             state = "conclude"
         elif state == "conclude" and millis() > idletime:
           idletime = millis() + 14000
