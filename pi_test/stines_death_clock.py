@@ -38,9 +38,9 @@ dIE       = b'\xFF\x03\x86\x03\xCF\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'
 On        = b'\xFF\x03\xAB\x03\xC0\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 
 HAVE      = b'\xFF\x03\x86\x03\xC1\x03\xFF\x03\x88\x03\x89\x03\xFF\x03\xFF\x03'
-A         = b'\xFF\x03\x88\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
-nICE      = b'\xFF\x03\x86\x03\xC6\x03\xFF\x03\xF9\x03\xAF\x02\xFF\x03\xFF\x03'
-dAY       = b'\xFF\x03\x91\x03\x81\x03\xFF\x03\xC1\x03\xFF\x03\xFF\x03\xFF\x03'
+A         = b'\xFF\x03\x88\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'          
+nICE      = b'\xFF\x03\x86\x03\xC6\x03\xFF\x03\xF9\x03\xAB\x03\xFF\x03\xFF\x03'         
+dAY       = b'\xFF\x03\xFF\x03\x88\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'  
 
 FInd      = b'\xFF\x03\xA1\x03\xAB\x03\xFF\x03\xF9\x03\x8E\x03\xFF\x03\xFF\x03'
 dISC      = b'\xFF\x03\xC6\x03\x92\x03\xFF\x03\xF9\x03\xA1\x03\xFF\x03\xFF\x03'
@@ -91,10 +91,10 @@ class nyancat:
     b'\xFF\x02\xA3\x03\xB7\x03\x7F\x01\xBE\x03\xBE\x03\xFB\x03\xFB\x03',
     b'\xFF\x03\xA3\x02\xB7\x03\xFF\x01\x3E\x03\xBE\x03\xFB\x03\xFB\x03',
     b'\xFF\x03\xFF\x03\xA3\x02\xFF\x01\xB7\x03\x3E\x03\xFB\x03\xFB\x03',
-    b'\xFF\x03\x86\x03\x87\x03\xFF\x03\x88\x03\x8E\x03\xFF\x03\xFF\x03',
+    b'\xFF\x03\xFF\x03\xA3\x03\xFF\x00\xB7\x03\xB7\x03\x7B\x03\xFB\x03',
     b'\xFF\x03\xFF\x03\x9C\x03\xFF\x01\xB7\x02\xB7\x03\xF7\x03\x7B\x03',
     b'\x7F\x03\xFF\x03\x9C\x03\xFF\x01\xBE\x03\xB7\x02\xF7\x03\xF7\x03',
-    b'\xFF\x03\xFF\x03\x86\x03\xFF\x03\x89\x03\x87\x03\xFF\x03\xFF\x03',
+    b'\xFF\x03\x1C\x03\xBE\x03\xFF\x01\xBE\x03\xBE\x03\xF7\x02\xF7\x03',
     b'\xFF\x03\x9C\x03\x3E\x03\xFF\x01\xBE\x03\xBE\x03\xFB\x03\xF4\x03'
   ) 
 
@@ -357,7 +357,7 @@ class deathclock:
     """
     if self.pi.connected:
       self.pi.i2c_write_i2c_block_data(self.p,offset,pattern)
-    else:
+    else: 
       #print("Offset {} Data {}".format(offset, ''.join('{:02x}'.format(x) for x in pattern)))
       print(''.join('{:02x}'.format(x) for x in pattern))
 
@@ -379,7 +379,7 @@ class deathclock:
           YF = YourFate()
           prev_frame = all_black
           state = "YourFate"
-          idletime = millis() + 14000
+          idletime = millis() + 15000
         elif state == "YourFate":
           # nyancat state has to run in a non-blocking loop
           # so we could check touch sensor in between animating
@@ -394,7 +394,7 @@ class deathclock:
             face = thinkingface()
             state = "thinking"
           elif millis() > idletime:
-            idletime = millis() + 14000
+            idletime = millis() + 15000
             blinkingtwelve = TwelveFlash()
             state = "flashing"
         elif state == "flashing":
@@ -409,7 +409,7 @@ class deathclock:
             state = "thinking"
           elif millis() > idletime:
             # Set things up for the nyancat loop
-            idletime = millis() + 14000
+            idletime = millis() + 15000
             YF = YourFate()
             prev_frame = all_black
             state = "YourFate"
@@ -455,7 +455,7 @@ class deathclock:
           if nd.completed():
             state = "conclude"
         elif state == "conclude" and millis() > idletime:
-          idletime = millis() + 14000
+          idletime = millis() + 15000
           self.send(0x04, all_black)
           prev_frame = all_black
           time.sleep(1)
