@@ -454,6 +454,16 @@ class deathclock:
             prev_frame = frame
           time.sleep(0.025)
           if nd.completed():
+            nc = nyancat()
+            state = "nyancat"
+        elif state == "nyancat":
+          idletime = millis() + 7500
+          frame = nc.current_frame()
+          if frame != prev_frame:
+            self.send(0x04, frame)
+            prev_frame = frame
+          time.sleep(0.025)
+          if nc.completed():
             state = "conclude"
         elif state == "conclude" and millis() > idletime:
           idletime = millis() + 16000
