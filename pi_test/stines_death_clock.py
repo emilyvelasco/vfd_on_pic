@@ -39,8 +39,9 @@ On        = b'\xFF\x03\xAB\x03\xC0\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'
 
 HAVE      = b'\xFF\x03\x86\x03\xC1\x03\xFF\x03\x88\x03\x89\x03\xFF\x03\xFF\x03'
 A         = b'\xFF\x03\x88\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03\xFF\x03'          
-nICE      = b'\xFF\x03\x86\x03\xC6\x03\xFF\x03\xF9\x03\xAB\x03\xFF\x03\xFF\x03'         
-dAY       = b'\xFF\x03\xFF\x03\x88\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'  
+nICE      = b'\xFF\x03\x86\x03\xC6\x03\xFF\x03\xF9\x03\xAB\x03\xFF\x03\xFF\x03'  
+                    
+dAY       = b'\xFF\x03\x91\x03\x88\x03\xFF\x03\xA1\x03\xFF\x03\xFF\x03\xFF\x03'  
 
 FInd      = b'\xFF\x03\xA1\x03\xAB\x03\xFF\x03\xF9\x03\x8E\x03\xFF\x03\xFF\x03'
 dISC      = b'\xFF\x03\xC6\x03\x92\x03\xFF\x03\xF9\x03\xA1\x03\xFF\x03\xFF\x03'
@@ -379,7 +380,7 @@ class deathclock:
           YF = YourFate()
           prev_frame = all_black
           state = "YourFate"
-          idletime = millis() + 15000
+          idletime = millis() + 16000
         elif state == "YourFate":
           # nyancat state has to run in a non-blocking loop
           # so we could check touch sensor in between animating
@@ -394,7 +395,7 @@ class deathclock:
             face = thinkingface()
             state = "thinking"
           elif millis() > idletime:
-            idletime = millis() + 15000
+            idletime = millis() + 16000
             blinkingtwelve = TwelveFlash()
             state = "flashing"
         elif state == "flashing":
@@ -409,7 +410,7 @@ class deathclock:
             state = "thinking"
           elif millis() > idletime:
             # Set things up for the nyancat loop
-            idletime = millis() + 15000
+            idletime = millis() + 16000
             YF = YourFate()
             prev_frame = all_black
             state = "YourFate"
@@ -446,7 +447,7 @@ class deathclock:
             nd = NiceDay()
             state = "niceday"
         elif state == "niceday":
-          idletime = millis() + 6000
+          idletime = millis() + 7500
           frame = nd.current_frame()
           if frame != prev_frame:
             self.send(0x04, frame)
@@ -455,7 +456,7 @@ class deathclock:
           if nd.completed():
             state = "conclude"
         elif state == "conclude" and millis() > idletime:
-          idletime = millis() + 15000
+          idletime = millis() + 16000
           self.send(0x04, all_black)
           prev_frame = all_black
           time.sleep(1)
