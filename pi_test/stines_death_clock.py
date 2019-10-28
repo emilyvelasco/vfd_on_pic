@@ -12,6 +12,9 @@ import random
 
 all_black = b'\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF'
 
+hold      = b'\xFF\x03\xA1\x03\xC7\x03\xFF\x03\xC1\x03\x99\x03\xFF\x03\xFF\x03'
+done      = b'\xFF\x03\x86\x03\xAB\x03\xFF\x03\xC0\x03\xA1\x03\xFF\x03\xFF\x03'
+
 eye_open  = b'\xFF\x03\x9C\x03\xFF\x03\xFF\x03\xFF\x03\x9C\x03\xFF\x03\xFF\x03'
 eye_smile = b'\xFF\x03\xDC\x03\xFF\x03\xFF\x03\xFF\x03\xDC\x03\xFF\x03\xFF\x03'
 eye_sleep = b'\xFF\x03\x9D\x03\xFF\x03\xFF\x03\xFF\x03\x9D\x03\xFF\x03\xFF\x03'
@@ -160,17 +163,15 @@ class YourFate:
 
 class thinkingface:
   frames = (
-    (1000, eye_open, smile_r),
-    (150, eye_close, smile_r),
-    (500, eye_open, smile_r),
-    (100, eye_close, smile_r),
-    (1000, eye_smile, smile_r)
+    (3000, hold),
+    (1000, done),
+
   )
 
   def __init__(self):
     self.complete = False
     self.frame_index = 0
-    self.next_frame_time = millis()
+    self.next_frame_time = millis() + 3000
 
   def completed(self):
     return self.complete
